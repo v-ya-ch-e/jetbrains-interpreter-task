@@ -88,12 +88,17 @@ trailing newline; `Main.kt` is responsible for printing the returned text.
 input, output, and error streams. The top-level `main(args)` passes the real
 process streams to this adapter and exits with the returned code.
 
+The repository root also includes a small `./run` shell helper for reviewers.
+It wraps the Maven build and exec commands documented in
+`docs/RUNNING_AND_TESTING.md`; the interpreter behavior still lives in
+`InterpreterCli`.
+
 CLI behavior:
 
 - `interpreter` reads source from standard input.
 - `interpreter path/to/program.txt` reads source from that file.
 - `interpreter --repl` or `interpreter -i` starts an interactive session.
-- `interpreter --help` prints usage information.
+- `interpreter --help` or `interpreter -h` prints usage information.
 - Syntax and evaluation errors are printed to standard error with exit code `1`.
 - Invalid CLI usage is printed to standard error with exit code `2`.
 
