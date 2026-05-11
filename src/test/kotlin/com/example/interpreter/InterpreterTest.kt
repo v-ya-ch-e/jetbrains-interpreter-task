@@ -79,6 +79,17 @@ class InterpreterTest {
     }
 
     @Test
+    fun `uses the most recent function definition`() {
+        val source = """
+            fun value() { return 1 }
+            fun value() { return 2 }
+            result = value()
+        """.trimIndent()
+
+        assertEquals("result: 2", interpreter.run(source))
+    }
+
+    @Test
     fun `keeps function locals out of formatted global output`() {
         val source = """
             offset = 3
@@ -138,5 +149,12 @@ class InterpreterTest {
 
         assertEquals("Undefined variable 'missing'", exception.description)
         assertEquals(listOf("inner", "outer"), exception.trace)
+    }
+
+    @Test
+    fun `rejects chained comparisons after left associative parsing`() {
+        assertFailsWith<EvaluationException> {
+            interpreter.run("x = 1 < 2 < 3")
+        }
     }
 }

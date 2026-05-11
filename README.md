@@ -18,11 +18,11 @@ global variables.
 ## Requirements
 
 - JDK 17 or newer.
-- Maven 3.x.
+- A POSIX-compatible shell for the optional root `./run` helper.
 
-There is no Maven wrapper in this repository. The root [`./run`](./run) helper
-wraps the same system `mvn` commands used by the project and keeps reviewer
-commands short.
+The repository includes the Maven Wrapper, so reviewers can use `./mvnw`
+without installing a specific Maven version. The root [`./run`](./run) helper
+wraps the same Maven commands and keeps common review commands short.
 
 ## Quick Reviewer Commands
 
@@ -54,7 +54,7 @@ Run a program from standard input or a source file:
 
 ```bash
 printf 'x = 2\ny = (x + 2) * 2\n' | ./run stdin
-./run file path/to/program.txt
+./run file examples/factorials.txt
 ```
 
 ## Build And Test
@@ -72,7 +72,7 @@ Compile, test, and package the project:
 ```
 
 The package command creates build artifacts under `target/`. If you prefer
-running Maven directly, use `mvn test` and `mvn clean package`.
+running Maven directly, use `./mvnw test` and `./mvnw clean package`.
 
 ## Run
 
@@ -81,7 +81,7 @@ The recommended review commands use the root helper:
 ```bash
 ./run sample
 printf 'x = 2\ny = (x + 2) * 2\n' | ./run stdin
-./run file path/to/program.txt
+./run file examples/factorials.txt
 ./run repl
 ./run cli-help
 ```
@@ -110,13 +110,13 @@ x: 2
 y: 8
 ```
 
-Equivalent direct Maven commands are:
+Equivalent direct Maven Wrapper commands are:
 
 ```bash
-printf 'x = 2\ny = (x + 2) * 2\n' | mvn -q exec:java
-mvn -q exec:java -Dexec.args="path/to/program.txt"
-mvn -q exec:java -Dexec.args="--repl"
-mvn -q exec:java -Dexec.args="--help"
+printf 'x = 2\ny = (x + 2) * 2\n' | ./mvnw -q exec:java
+./mvnw -q exec:java -Dexec.args="examples/factorials.txt"
+./mvnw -q exec:java -Dexec.args="--repl"
+./mvnw -q exec:java -Dexec.args="--help"
 ```
 
 ## Runtime Behavior
@@ -146,7 +146,9 @@ language error, so the last successful session state remains available.
 - [`src/main/kotlin/com/example/interpreter/runtime`](src/main/kotlin/com/example/interpreter/runtime):
   values, runtime state, errors, execution results, and output formatting.
 - [`src/test/kotlin/com/example/interpreter`](src/test/kotlin/com/example/interpreter):
-  parser, evaluator, formatter, interpreter, and CLI tests.
+  lexer, parser, evaluator, formatter, interpreter, and CLI tests.
+- [`examples`](examples):
+  runnable sample programs from the original task and a combined factorial demo.
 
 The pipeline is:
 
@@ -170,3 +172,7 @@ For a technical review, start with this README, then read
 [`docs/LANGUAGE_DOCUMENTATION.md`](docs/LANGUAGE_DOCUMENTATION.md) for expected
 language behavior and [`docs/RUNNING_AND_TESTING.md`](docs/RUNNING_AND_TESTING.md)
 for command details.
+
+## License
+
+This project is available under the [MIT License](LICENSE).

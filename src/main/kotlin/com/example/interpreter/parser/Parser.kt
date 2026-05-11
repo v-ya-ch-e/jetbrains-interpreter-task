@@ -70,7 +70,11 @@ class Parser(
             val parameters = mutableListOf<String>()
             if (!check(TokenType.RIGHT_PAREN)) {
                 do {
-                    parameters.add(consume(TokenType.IDENTIFIER, "Expected parameter name").lexeme)
+                    val parameter = consume(TokenType.IDENTIFIER, "Expected parameter name")
+                    if (parameter.lexeme in parameters) {
+                        throw SyntaxException("Duplicate parameter name '${parameter.lexeme}'", parameter.location)
+                    }
+                    parameters.add(parameter.lexeme)
                 } while (match(TokenType.COMMA))
             }
             consume(TokenType.RIGHT_PAREN, "Expected ')' after function parameters")

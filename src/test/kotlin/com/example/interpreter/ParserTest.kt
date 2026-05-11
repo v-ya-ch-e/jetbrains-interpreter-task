@@ -237,4 +237,13 @@ class ParserTest {
             parser.parse("fun bad() { x = 1, }")
         }
     }
+
+    @Test
+    fun `rejects duplicate function parameter names`() {
+        val exception = assertFailsWith<SyntaxException> {
+            parser.parse("fun bad(value, value) { return value }")
+        }
+
+        assertEquals("Duplicate parameter name 'value'", exception.description)
+    }
 }
