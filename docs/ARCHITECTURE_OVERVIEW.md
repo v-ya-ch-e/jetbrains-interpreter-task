@@ -9,9 +9,10 @@ defined in `docs/LANGUAGE_DOCUMENTATION.md`.
 source text -> lexer -> parser -> AST -> evaluator -> output formatter
 ```
 
-`Main.kt` reads the full source program from standard input and delegates to
-`Interpreter`, which wires together the parser, evaluator, and output
-formatter.
+`Main.kt` is the command-line adapter. It reads the full source program from
+standard input by default, or from one source file argument when provided, and
+delegates to `Interpreter`, which wires together the parser, evaluator, and
+output formatter.
 
 ## Lexer
 
@@ -77,6 +78,20 @@ variables are omitted.
 An empty result formats as an empty string. Non-empty output does not include a
 trailing newline; `Main.kt` is responsible for printing the returned text.
 
+## Command-Line Entry Point
+
+`InterpreterCli` keeps `Main.kt` testable by accepting explicit argument,
+input, output, and error streams. The top-level `main(args)` passes the real
+process streams to this adapter and exits with the returned code.
+
+CLI behavior:
+
+- `interpreter` reads source from standard input.
+- `interpreter path/to/program.txt` reads source from that file.
+- `interpreter --help` prints usage information.
+- Syntax and evaluation errors are printed to standard error with exit code `1`.
+- Invalid CLI usage is printed to standard error with exit code `2`.
+
 ## Verification
 
 Tests document the parser, evaluator, formatter, and integrated interpreter
@@ -87,3 +102,5 @@ behavior:
   runtime errors.
 - `OutputFormatterTest` verifies final text rendering.
 - `InterpreterTest` verifies the complete in-memory pipeline before `Main.kt`.
+- `MainTest` verifies command-line stdin input, file input, help text, stderr,
+  and exit codes.
