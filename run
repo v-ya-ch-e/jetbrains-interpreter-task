@@ -1,7 +1,11 @@
 #!/usr/bin/env sh
 set -eu
 
-MAVEN="${MAVEN:-mvn}"
+if [ -z "${MAVEN:-}" ] && [ -x "./mvnw" ]; then
+    MAVEN="./mvnw"
+else
+    MAVEN="${MAVEN:-mvn}"
+fi
 
 print_usage() {
     printf '%s\n' \
@@ -21,7 +25,7 @@ print_usage() {
         "  ./run test" \
         "  ./run sample" \
         "  ./run stdin < path/to/program.txt" \
-        "  ./run file path/to/program.txt" \
+        "  ./run file examples/factorials.txt" \
         "  ./run repl"
 }
 
