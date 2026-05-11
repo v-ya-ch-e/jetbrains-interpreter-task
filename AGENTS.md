@@ -67,6 +67,8 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Treat `docs/LANGUAGE_DOCUMENTATION.md` as the behavioral source of truth for language syntax and semantics.
 - Preserve the existing pipeline boundaries: lexer tokenizes source text, parser builds `ast` nodes, evaluator executes the AST, and runtime formatting renders `ExecutionResult`.
 - Keep parser and evaluator tests focused on documented language behavior before changing syntax or semantics.
+- Keep evaluator logic independent from textual output. Evaluator tests should assert `ExecutionResult` and `Value` objects; formatter tests should assert only rendered text.
+- Do not route new interpreter behavior through `Main.kt` unless the task is specifically about command-line integration.
 
 ---
 

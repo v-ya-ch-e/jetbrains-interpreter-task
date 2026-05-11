@@ -9,9 +9,10 @@ defined in `docs/LANGUAGE_DOCUMENTATION.md`.
 source text -> lexer -> parser -> AST -> evaluator -> output formatter
 ```
 
-`Main.kt` reads the full source program from standard input and delegates to
-`Interpreter`, which wires together the parser, evaluator, and output
-formatter.
+`Main.kt` is the command-line adapter. It reads the full source program from
+standard input by default, or from one source file argument when provided, and
+delegates to `Interpreter`, which wires together the parser, evaluator, and
+output formatter.
 
 ## Lexer
 
@@ -58,6 +59,10 @@ Implemented runtime behavior includes:
   invalid operand types, top-level `return`, and functions that finish without
   returning.
 
+The evaluator returns an `ExecutionResult` instead of formatted text. This keeps
+execution independent from presentation and makes evaluator tests assert directly
+against runtime values.
+
 ## Output Formatter
 
 `runtime/OutputFormatter.kt` formats the final `ExecutionResult` as one global
@@ -70,9 +75,32 @@ name: value
 Only global variables are printed. Function definitions and function-local
 variables are omitted.
 
-## Placeholder For Remaining Pipeline Work
+An empty result formats as an empty string. Non-empty output does not include a
+trailing newline; `Main.kt` is responsible for printing the returned text.
 
-Future pipeline stages can be added after the formatter boundary without
-changing parser or evaluator responsibilities. Possible remaining work includes
-command-line error presentation, richer diagnostics, integration packaging, or
-additional language features if the language specification grows.
+## Command-Line Entry Point
+
+`InterpreterCli` keeps `Main.kt` testable by accepting explicit argument,
+input, output, and error streams. The top-level `main(args)` passes the real
+process streams to this adapter and exits with the returned code.
+
+CLI behavior:
+
+- `interpreter` reads source from standard input.
+- `interpreter path/to/program.txt` reads source from that file.
+- `interpreter --help` prints usage information.
+- Syntax and evaluation errors are printed to standard error with exit code `1`.
+- Invalid CLI usage is printed to standard error with exit code `2`.
+
+## Verification
+
+Tests document the parser, evaluator, formatter, and integrated interpreter
+behavior:
+
+- `ParserTest` verifies AST construction and statement grouping.
+- `EvaluatorTest` verifies execution semantics, scope, returns, recursion, and
+  runtime errors.
+- `OutputFormatterTest` verifies final text rendering.
+- `InterpreterTest` verifies the complete in-memory pipeline before `Main.kt`.
+- `MainTest` verifies command-line stdin input, file input, help text, stderr,
+  and exit codes.

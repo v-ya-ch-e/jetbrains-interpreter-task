@@ -249,8 +249,20 @@ assignment inside a function always writes to the function-local scope.
 
 ## Program Output
 
-After the program finishes, the interpreter prints all global variables and
-their final values to standard output.
+The command-line interpreter reads source from standard input by default:
+
+```bash
+printf 'x = 2\ny = (x + 2) * 2\n' | mvn -q exec:java
+```
+
+For convenience, it can also read from one source file argument:
+
+```bash
+mvn -q exec:java -Dexec.args="path/to/program.txt"
+```
+
+After the program finishes successfully, the interpreter prints all global
+variables and their final values to standard output.
 
 The output format is one variable per line:
 
@@ -362,6 +374,6 @@ The following situations are execution errors:
 - Using `return` outside a function.
 - Reaching the end of a function without returning a value.
 
-The task description only specifies successful program output. Error reporting
-format is therefore implementation-defined, but errors should be clear enough to
-identify the invalid construct.
+The task description only specifies successful program output. This
+implementation prints syntax and execution errors to standard error prefixed with
+`Error:` and exits with a non-zero status.
