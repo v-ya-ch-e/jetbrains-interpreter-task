@@ -23,6 +23,12 @@ Run a program from a source file:
 mvn -q exec:java -Dexec.args="path/to/program.txt"
 ```
 
+Start an interactive REPL session:
+
+```bash
+mvn -q exec:java -Dexec.args="--repl"
+```
+
 Print CLI usage:
 
 ```bash
@@ -31,7 +37,9 @@ mvn -q exec:java -Dexec.args="--help"
 
 On success, the interpreter prints global variables to standard output in their
 first-assignment order. Syntax and execution errors are printed to standard error
-with a non-zero exit code.
+with a non-zero exit code in batch mode. In REPL mode, each successful input
+prints the current global variables, and previously assigned variables and
+defined functions stay available until `:quit` or `:exit`.
 
 ## Current Structure
 
@@ -40,6 +48,6 @@ with a non-zero exit code.
 - `ast`: immutable representation of programs, statements, and expressions.
 - `eval`: executes the AST.
 - `runtime`: runtime values, state, errors, and output formatting.
-- `Main.kt`: command-line entry point for stdin and file-based execution.
+- `Main.kt`: command-line entry point for stdin, file-based execution, and REPL mode.
 
 The implemented pipeline is documented in `docs/ARCHITECTURE_OVERVIEW.md`.

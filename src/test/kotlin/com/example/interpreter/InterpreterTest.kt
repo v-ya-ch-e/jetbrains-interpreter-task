@@ -96,6 +96,21 @@ class InterpreterTest {
     }
 
     @Test
+    fun `session preserves variables and functions between runs`() {
+        val session = interpreter.createSession()
+
+        assertEquals("x: 2", session.run("x = 2"))
+        assertEquals("x: 2", session.run("fun inc(value) { return value + 1 }"))
+        assertEquals(
+            """
+            x: 2
+            y: 3
+            """.trimIndent(),
+            session.run("y = inc(x)"),
+        )
+    }
+
+    @Test
     fun `rejects syntax without top-level line separators`() {
         assertFailsWith<SyntaxException> {
             interpreter.run("x = 1 y = 2")

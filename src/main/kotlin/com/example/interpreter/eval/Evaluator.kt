@@ -27,9 +27,10 @@ import com.example.interpreter.runtime.RuntimeState
 import com.example.interpreter.runtime.Value
 
 class Evaluator {
-    fun execute(program: Program): ExecutionResult {
-        val state = RuntimeState()
+    fun execute(program: Program): ExecutionResult =
+        execute(program, RuntimeState())
 
+    fun execute(program: Program, state: RuntimeState): ExecutionResult {
         for (declaration in program.declarations) {
             when (declaration) {
                 is FunctionDefinition -> state.functions[declaration.name] = declaration

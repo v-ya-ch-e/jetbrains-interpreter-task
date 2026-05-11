@@ -249,7 +249,8 @@ assignment inside a function always writes to the function-local scope.
 
 ## Program Output
 
-The command-line interpreter reads source from standard input by default:
+In batch mode, the command-line interpreter reads source from standard input by
+default:
 
 ```bash
 printf 'x = 2\ny = (x + 2) * 2\n' | mvn -q exec:java
@@ -287,6 +288,38 @@ stdout:
 
 Boolean values, if assigned to global variables, are printed as `true` or
 `false`.
+
+## Interactive REPL
+
+The interpreter also provides an interactive REPL mode:
+
+```bash
+mvn -q exec:java -Dexec.args="--repl"
+```
+
+The REPL reads one top-level input at a time, executes it immediately, and keeps
+the same runtime state for the next input. Global variables and function
+definitions therefore remain available until the session ends.
+
+```text
+> x = 2
+x: 2
+> y = x + 3
+x: 2
+y: 5
+> fun inc(value) { return value + 1 }
+x: 2
+y: 5
+> z = inc(y)
+x: 2
+y: 5
+z: 6
+```
+
+Enter `:quit` or `:exit` to stop the session. If a function definition spans
+multiple lines, the prompt changes to `... ` until the braces are balanced.
+Syntax and execution errors are printed to standard error, and the REPL then
+continues with the next input.
 
 ## Complete Examples
 
