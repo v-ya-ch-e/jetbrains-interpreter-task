@@ -60,6 +60,14 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
+## 5. Interpreter Project Conventions
+
+**Keep pipeline responsibilities narrow and documented.**
+
+- Treat `docs/LANGUAGE_DOCUMENTATION.md` as the behavioral source of truth for language syntax and semantics.
+- Preserve the existing pipeline boundaries: lexer tokenizes source text, parser builds `ast` nodes, evaluator executes the AST, and runtime formatting renders `ExecutionResult`.
+- Keep parser and evaluator tests focused on documented language behavior before changing syntax or semantics.
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
