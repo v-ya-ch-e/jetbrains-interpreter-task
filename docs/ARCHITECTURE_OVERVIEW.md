@@ -58,6 +58,10 @@ Implemented runtime behavior includes:
   invalid operand types, top-level `return`, and functions that finish without
   returning.
 
+The evaluator returns an `ExecutionResult` instead of formatted text. This keeps
+execution independent from presentation and makes evaluator tests assert directly
+against runtime values.
+
 ## Output Formatter
 
 `runtime/OutputFormatter.kt` formats the final `ExecutionResult` as one global
@@ -70,9 +74,16 @@ name: value
 Only global variables are printed. Function definitions and function-local
 variables are omitted.
 
-## Placeholder For Remaining Pipeline Work
+An empty result formats as an empty string. Non-empty output does not include a
+trailing newline; `Main.kt` is responsible for printing the returned text.
 
-Future pipeline stages can be added after the formatter boundary without
-changing parser or evaluator responsibilities. Possible remaining work includes
-command-line error presentation, richer diagnostics, integration packaging, or
-additional language features if the language specification grows.
+## Verification
+
+Tests document the parser, evaluator, formatter, and integrated interpreter
+behavior:
+
+- `ParserTest` verifies AST construction and statement grouping.
+- `EvaluatorTest` verifies execution semantics, scope, returns, recursion, and
+  runtime errors.
+- `OutputFormatterTest` verifies final text rendering.
+- `InterpreterTest` verifies the complete in-memory pipeline before `Main.kt`.
