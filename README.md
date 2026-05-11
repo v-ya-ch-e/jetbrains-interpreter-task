@@ -26,4 +26,4 @@ global variables to standard output.
 - `eval`: executes the AST.
 - `runtime`: runtime values, state, errors, and output formatting.
 
-Parser and evaluator behavior is intentionally left as explicit `TODO` blocks.
+The implemented pipeline is documented in `docs/ARCHITECTURE_OVERVIEW.md`.
