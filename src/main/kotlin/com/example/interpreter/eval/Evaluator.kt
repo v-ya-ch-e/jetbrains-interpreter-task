@@ -27,9 +27,10 @@ import com.example.interpreter.runtime.RuntimeState
 import com.example.interpreter.runtime.Value
 
 class Evaluator {
-    fun execute(program: Program): ExecutionResult {
-        val state = RuntimeState()
+    fun execute(program: Program): ExecutionResult =
+        execute(program, RuntimeState())
 
+    fun execute(program: Program, state: RuntimeState): ExecutionResult {
         for (declaration in program.declarations) {
             when (declaration) {
                 is FunctionDefinition -> state.functions[declaration.name] = declaration
@@ -190,10 +191,14 @@ class Evaluator {
 
         val arguments = expression.arguments.map { evaluateExpression(it, state, frame) }
         val parameters = function.parameters.zip(arguments).toMap()
-        val returned = executeSequence(function.body, state, CallFrame(parameters))
+        val returned = try {
+            executeSequence(function.body, state, CallFrame(parameters))
+        } catch (exception: EvaluationException) {
+            throw exception.withCall(function.name)
+        }
 
         return returned
-            ?: throw EvaluationException("Function '${expression.name}' completed without return")
+            ?: throw EvaluationException("Function '${expression.name}' completed without return").withCall(function.name)
     }
 
     private fun requireInt(value: Value, context: String): IntValue =

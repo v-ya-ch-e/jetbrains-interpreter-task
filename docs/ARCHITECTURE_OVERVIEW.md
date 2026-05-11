@@ -10,9 +10,11 @@ source text -> lexer -> parser -> AST -> evaluator -> output formatter
 ```
 
 `Main.kt` is the command-line adapter. It reads the full source program from
-standard input by default, or from one source file argument when provided, and
-delegates to `Interpreter`, which wires together the parser, evaluator, and
-output formatter.
+standard input by default, reads from one source file argument when provided, or
+starts an interactive REPL with `--repl`. Batch execution delegates to
+`Interpreter`, which wires together the parser, evaluator, and output formatter.
+REPL execution uses `InterpreterSession` to keep one runtime state across
+multiple inputs.
 
 ## Lexer
 
@@ -45,7 +47,9 @@ comparisons.
 
 ## Evaluator
 
-`eval/Evaluator.kt` executes AST declarations from top to bottom.
+`eval/Evaluator.kt` executes AST declarations from top to bottom. Batch
+execution creates a fresh runtime state for each program; session execution
+passes an existing `RuntimeState` back into the evaluator.
 
 Implemented runtime behavior includes:
 
@@ -84,13 +88,25 @@ trailing newline; `Main.kt` is responsible for printing the returned text.
 input, output, and error streams. The top-level `main(args)` passes the real
 process streams to this adapter and exits with the returned code.
 
+The repository root also includes a small `./run` shell helper for reviewers.
+It wraps the Maven build and exec commands documented in
+`docs/RUNNING_AND_TESTING.md`; the interpreter behavior still lives in
+`InterpreterCli`.
+
 CLI behavior:
 
 - `interpreter` reads source from standard input.
 - `interpreter path/to/program.txt` reads source from that file.
-- `interpreter --help` prints usage information.
+- `interpreter --repl` or `interpreter -i` starts an interactive session.
+- `interpreter --help` or `interpreter -h` prints usage information.
 - Syntax and evaluation errors are printed to standard error with exit code `1`.
 - Invalid CLI usage is printed to standard error with exit code `2`.
+
+In REPL mode, `InterpreterRepl` prompts with `> ` for a new top-level input and
+`... ` while a multi-line function definition has unclosed braces. Each
+successful input prints the current formatted global state. Language errors are
+printed to standard error without ending the session, so the previous successful
+state remains available for later input.
 
 ## Verification
 
@@ -102,5 +118,6 @@ behavior:
   runtime errors.
 - `OutputFormatterTest` verifies final text rendering.
 - `InterpreterTest` verifies the complete in-memory pipeline before `Main.kt`.
-- `MainTest` verifies command-line stdin input, file input, help text, stderr,
-  and exit codes.
+- `InterpreterTest` also verifies persistent session behavior.
+- `MainTest` verifies command-line stdin input, file input, REPL mode, help text,
+  stderr, and exit codes.

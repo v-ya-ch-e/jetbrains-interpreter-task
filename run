@@ -1,0 +1,90 @@
+#!/usr/bin/env sh
+set -eu
+
+MAVEN="${MAVEN:-mvn}"
+
+print_usage() {
+    printf '%s\n' \
+        "Usage: ./run <command>" \
+        "" \
+        "Commands:" \
+        "  test                 Run the full automated test suite." \
+        "  package              Clean, test, and package the project." \
+        "  sample               Run a small built-in sample program." \
+        "  stdin                Run a program from standard input." \
+        "  file <source-file>   Run a program from a source file." \
+        "  repl                 Start an interactive REPL session." \
+        "  cli-help             Print the interpreter CLI help." \
+        "  help                 Print this wrapper help." \
+        "" \
+        "Examples:" \
+        "  ./run test" \
+        "  ./run sample" \
+        "  ./run stdin < path/to/program.txt" \
+        "  ./run file path/to/program.txt" \
+        "  ./run repl"
+}
+
+require_no_args() {
+    command_name="$1"
+    shift
+
+    if [ "$#" -ne 0 ]; then
+        printf 'Error: ./run %s does not accept extra arguments.\n' "$command_name" >&2
+        exit 2
+    fi
+}
+
+command="${1:-help}"
+
+case "$command" in
+    test)
+        shift
+        require_no_args "$command" "$@"
+        exec "$MAVEN" test
+        ;;
+    package)
+        shift
+        require_no_args "$command" "$@"
+        exec "$MAVEN" clean package
+        ;;
+    sample)
+        shift
+        require_no_args "$command" "$@"
+        printf 'x = 2\ny = (x + 2) * 2\n' | "$MAVEN" -q exec:java
+        ;;
+    stdin)
+        shift
+        require_no_args "$command" "$@"
+        exec "$MAVEN" -q exec:java
+        ;;
+    file)
+        shift
+        if [ "$#" -ne 1 ]; then
+            printf 'Error: ./run file expects exactly one source file.\n' >&2
+            printf 'Usage: ./run file path/to/program.txt\n' >&2
+            exit 2
+        fi
+        exec "$MAVEN" -q exec:java -Dexec.args="$1"
+        ;;
+    repl)
+        shift
+        require_no_args "$command" "$@"
+        exec "$MAVEN" -q exec:java -Dexec.args="--repl"
+        ;;
+    cli-help)
+        shift
+        require_no_args "$command" "$@"
+        exec "$MAVEN" -q exec:java -Dexec.args="--help"
+        ;;
+    help|-h|--help)
+        shift || true
+        require_no_args "$command" "$@"
+        print_usage
+        ;;
+    *)
+        printf 'Error: Unknown command: %s\n\n' "$command" >&2
+        print_usage >&2
+        exit 2
+        ;;
+esac

@@ -1,5 +1,6 @@
 package com.example.interpreter
 
+import com.example.interpreter.runtime.ErrorFormatter
 import com.example.interpreter.runtime.LanguageException
 import java.io.File
 import java.io.InputStream
@@ -12,6 +13,7 @@ fun main(args: Array<String>) {
 
 class InterpreterCli(
     private val interpreter: Interpreter = Interpreter(),
+    private val errorFormatter: ErrorFormatter = ErrorFormatter(),
 ) {
     fun run(
         args: Array<String>,
@@ -19,15 +21,19 @@ class InterpreterCli(
         output: PrintStream,
         error: PrintStream,
     ): Int {
-        if (args.size > 1) {
-            error.println("Error: Expected zero or one source file argument.")
-            error.println(usage())
-            return 2
-        }
-
         if (args.singleOrNull() in setOf("-h", "--help")) {
             output.println(usage())
             return 0
+        }
+
+        if (args.singleOrNull() in setOf("-i", "--repl")) {
+            return InterpreterRepl(interpreter.createSession()).run(input, output, error)
+        }
+
+        if (args.size > 1) {
+            error.println("Error: Expected zero or one argument.")
+            error.println(usage())
+            return 2
         }
 
         return try {
@@ -41,7 +47,7 @@ class InterpreterCli(
             }
             0
         } catch (exception: LanguageException) {
-            error.println("Error: ${exception.message}")
+            error.println(errorFormatter.format(exception))
             1
         } catch (exception: java.io.IOException) {
             error.println("Error: ${exception.message}")
@@ -51,8 +57,12 @@ class InterpreterCli(
 
     private fun usage(): String =
         """
-        Usage: interpreter [source-file]
+        Usage:
+          interpreter [source-file]
+          interpreter --repl | -i
+          interpreter --help | -h
 
         Reads source from standard input when no file is provided.
+        In REPL mode, enter :quit or :exit to stop.
         """.trimIndent()
 }
