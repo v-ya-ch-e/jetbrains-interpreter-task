@@ -115,6 +115,9 @@ Operator precedence, from highest to lowest:
 | 5 | Comparisons: `<`, `<=`, `>`, `>=`, `==`, `!=` |
 
 Operators with the same precedence are evaluated from left to right.
+Chained comparisons are not special-cased: `1 < 2 < 3` is parsed as
+`(1 < 2) < 3` and fails at runtime because comparison operands must be
+integers.
 
 ## Statements
 
@@ -198,8 +201,12 @@ A function definition registers a function under its name. Function definitions
 do not create printable variables and do not execute their bodies immediately.
 The body runs only when the function is called.
 
-Parameters are local variables initialized from the call arguments. Arguments
-are evaluated before the function call starts.
+Parameters are local variables initialized from the call arguments. Parameter
+names must be unique within one function definition. Arguments are evaluated
+before the function call starts.
+
+If a function is defined more than once, the most recent definition replaces
+the previous one. This is especially useful in REPL sessions.
 
 Functions may call other functions and may call themselves recursively:
 
@@ -253,13 +260,13 @@ In batch mode, the command-line interpreter reads source from standard input by
 default:
 
 ```bash
-printf 'x = 2\ny = (x + 2) * 2\n' | mvn -q exec:java
+printf 'x = 2\ny = (x + 2) * 2\n' | ./mvnw -q exec:java
 ```
 
 For convenience, it can also read from one source file argument:
 
 ```bash
-mvn -q exec:java -Dexec.args="path/to/program.txt"
+./mvnw -q exec:java -Dexec.args="examples/factorials.txt"
 ```
 
 After the program finishes successfully, the interpreter prints all global
@@ -294,7 +301,7 @@ Boolean values, if assigned to global variables, are printed as `true` or
 The interpreter also provides an interactive REPL mode:
 
 ```bash
-mvn -q exec:java -Dexec.args="--repl"
+./mvnw -q exec:java -Dexec.args="--repl"
 ```
 
 The REPL reads one top-level input at a time, executes it immediately, and keeps
@@ -319,8 +326,7 @@ z: 6
 Enter `:quit` or `:exit` to stop the session. If a function definition spans
 multiple lines, the prompt changes to `... ` until the braces are balanced.
 Syntax and execution errors are printed to standard error, and the REPL then
-continues with the next input. The REPL supports command history with the up
-and down arrow keys during an interactive terminal session.
+continues with the next input.
 
 ## Complete Examples
 

@@ -6,7 +6,7 @@ the interpreter.
 ## Requirements
 
 - JDK 17 or newer.
-- Maven 3.x available as `mvn`.
+- The included Maven Wrapper (`./mvnw`).
 - A POSIX-compatible shell for the optional root `./run` helper.
 
 ## Wrapper Commands
@@ -20,7 +20,7 @@ The root `./run` helper is the shortest way to exercise the project:
 ./run sample
 ./run repl
 ./run stdin < path/to/program.txt
-./run file path/to/program.txt
+./run file examples/factorials.txt
 ./run cli-help
 ```
 
@@ -39,6 +39,21 @@ Expected output:
 ```text
 x: 2
 y: 8
+```
+
+## Example Programs
+
+The `examples/` directory contains runnable versions of the original task
+samples plus a combined factorial demo:
+
+```bash
+./run file examples/arithmetic.txt
+./run file examples/conditional.txt
+./run file examples/loop.txt
+./run file examples/add-function.txt
+./run file examples/factorial-recursive.txt
+./run file examples/factorial-iterative.txt
+./run file examples/factorials.txt
 ```
 
 ## REPL Usage
@@ -92,20 +107,18 @@ answer: 42
 
 If an input has a language error, the REPL prints the error and keeps running.
 The last successful variables and functions remain available.
-Use the up and down arrow keys to restore commands entered earlier in the same
-REPL session.
 
-## Direct Maven Commands
+## Direct Maven Wrapper Commands
 
 The helper delegates to these Maven commands:
 
 ```bash
-mvn test
-mvn clean package
-printf 'x = 2\ny = (x + 2) * 2\n' | mvn -q exec:java
-mvn -q exec:java -Dexec.args="path/to/program.txt"
-mvn -q exec:java -Dexec.args="--repl"
-mvn -q exec:java -Dexec.args="--help"
+./mvnw test
+./mvnw clean package
+printf 'x = 2\ny = (x + 2) * 2\n' | ./mvnw -q exec:java
+./mvnw -q exec:java -Dexec.args="examples/factorials.txt"
+./mvnw -q exec:java -Dexec.args="--repl"
+./mvnw -q exec:java -Dexec.args="--help"
 ```
 
 ## Exit Behavior

@@ -110,14 +110,17 @@ state remains available for later input.
 
 ## Verification
 
-Tests document the parser, evaluator, formatter, and integrated interpreter
-behavior:
+Tests document the full pipeline and the language decisions in
+`docs/LANGUAGE_DOCUMENTATION.md`:
 
-- `ParserTest` verifies AST construction and statement grouping.
+- `LexerTest` verifies tokenization, source locations, newline handling, and
+  lexer-specific syntax errors.
+- `ParserTest` verifies AST construction, precedence, statement grouping, and
+  parser-level validation such as duplicate function parameters.
 - `EvaluatorTest` verifies execution semantics, scope, returns, recursion, and
   runtime errors.
 - `OutputFormatterTest` verifies final text rendering.
-- `InterpreterTest` verifies the complete in-memory pipeline before `Main.kt`.
-- `InterpreterTest` also verifies persistent session behavior.
+- `InterpreterTest` verifies the complete in-memory pipeline, persistent session
+  behavior, function redefinition behavior, and expression edge cases.
 - `MainTest` verifies command-line stdin input, file input, REPL mode, help text,
   stderr, and exit codes.
