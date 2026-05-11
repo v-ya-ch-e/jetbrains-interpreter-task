@@ -1,6 +1,11 @@
 package com.example.interpreter
 
+import com.example.interpreter.runtime.ErrorFormatter
 import com.example.interpreter.runtime.LanguageException
+import org.jline.reader.EndOfFileException
+import org.jline.reader.LineReaderBuilder
+import org.jline.reader.UserInterruptException
+import org.jline.terminal.TerminalBuilder
 import java.io.InputStream
 import java.io.PrintStream
 
@@ -8,20 +13,19 @@ class InterpreterRepl(
     private val session: InterpreterSession = Interpreter().createSession(),
     private val primaryPrompt: String = "> ",
     private val continuationPrompt: String = "... ",
+    private val errorFormatter: ErrorFormatter = ErrorFormatter(),
 ) {
     fun run(
         input: InputStream,
         output: PrintStream,
         error: PrintStream,
     ): Int {
-        val reader = input.bufferedReader()
+        val reader = createInput(input, output)
         val buffer = StringBuilder()
 
         while (true) {
-            output.print(if (buffer.length == 0) primaryPrompt else continuationPrompt)
-            output.flush()
-
-            val line = reader.readLine() ?: break
+            val prompt = if (buffer.length == 0) primaryPrompt else continuationPrompt
+            val line = reader.readLine(prompt) ?: break
             if (buffer.length == 0 && line.trim() in EXIT_COMMANDS) {
                 break
             }
@@ -49,6 +53,13 @@ class InterpreterRepl(
         return 0
     }
 
+    private fun createInput(input: InputStream, output: PrintStream): ReplInput =
+        if (input === System.`in` && output === System.out && System.console() != null) {
+            JLineReplInput()
+        } else {
+            StreamReplInput(input, output)
+        }
+
     private fun execute(
         source: String,
         output: PrintStream,
@@ -60,7 +71,7 @@ class InterpreterRepl(
                 output.println(formattedResult)
             }
         } catch (exception: LanguageException) {
-            error.println("Error: ${exception.message}")
+            error.println(errorFormatter.format(exception))
         }
     }
 
@@ -78,4 +89,40 @@ class InterpreterRepl(
     private companion object {
         val EXIT_COMMANDS = setOf(":quit", ":exit")
     }
+}
+
+private interface ReplInput {
+    fun readLine(prompt: String): String?
+}
+
+private class StreamReplInput(
+    input: InputStream,
+    private val output: PrintStream,
+) : ReplInput {
+    private val reader = input.bufferedReader()
+
+    override fun readLine(prompt: String): String? {
+        output.print(prompt)
+        output.flush()
+        return reader.readLine()
+    }
+}
+
+private class JLineReplInput : ReplInput {
+    private val terminal = TerminalBuilder.builder()
+        .system(true)
+        .build()
+    private val reader = LineReaderBuilder.builder()
+        .appName("interpreter")
+        .terminal(terminal)
+        .build()
+
+    override fun readLine(prompt: String): String? =
+        try {
+            reader.readLine(prompt)
+        } catch (_: EndOfFileException) {
+            null
+        } catch (_: UserInterruptException) {
+            null
+        }
 }

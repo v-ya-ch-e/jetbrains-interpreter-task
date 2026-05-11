@@ -54,6 +54,24 @@ class MainTest {
     }
 
     @Test
+    fun `prints function trace for language errors`() {
+        val result = runCli(
+            input = """
+                fun inner() { return missing }
+                fun outer() { return inner() }
+                value = outer()
+            """.trimIndent(),
+        )
+
+        assertEquals(1, result.exitCode)
+        assertEquals("", result.stdout)
+        assertEquals(
+            "Error: Undefined variable 'missing'\nTrace:\n  at inner()\n  at outer()\n",
+            result.stderr,
+        )
+    }
+
+    @Test
     fun `runs repl commands in one persistent session`() {
         val result = runCli(
             args = arrayOf("--repl"),
@@ -78,14 +96,16 @@ class MainTest {
         val invalidResult = runCli(args = arrayOf("first.txt", "second.txt"))
 
         assertEquals(0, helpResult.exitCode)
-        assertTrue(helpResult.stdout.contains("Usage: interpreter [source-file]"))
-        assertTrue(helpResult.stdout.contains("interpreter --repl"))
+        assertTrue(helpResult.stdout.contains("Usage:"))
+        assertTrue(helpResult.stdout.contains("interpreter [source-file]"))
+        assertTrue(helpResult.stdout.contains("interpreter --repl | -i"))
+        assertTrue(helpResult.stdout.contains("interpreter --help | -h"))
         assertEquals("", helpResult.stderr)
 
         assertEquals(2, invalidResult.exitCode)
         assertEquals("", invalidResult.stdout)
         assertTrue(invalidResult.stderr.contains("Expected zero or one argument."))
-        assertTrue(invalidResult.stderr.contains("Usage: interpreter [source-file]"))
+        assertTrue(invalidResult.stderr.contains("interpreter [source-file]"))
     }
 
     private fun runCli(

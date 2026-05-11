@@ -319,7 +319,8 @@ z: 6
 Enter `:quit` or `:exit` to stop the session. If a function definition spans
 multiple lines, the prompt changes to `... ` until the braces are balanced.
 Syntax and execution errors are printed to standard error, and the REPL then
-continues with the next input.
+continues with the next input. The REPL supports command history with the up
+and down arrow keys during an interactive terminal session.
 
 ## Complete Examples
 

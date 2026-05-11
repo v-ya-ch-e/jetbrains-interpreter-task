@@ -191,10 +191,14 @@ class Evaluator {
 
         val arguments = expression.arguments.map { evaluateExpression(it, state, frame) }
         val parameters = function.parameters.zip(arguments).toMap()
-        val returned = executeSequence(function.body, state, CallFrame(parameters))
+        val returned = try {
+            executeSequence(function.body, state, CallFrame(parameters))
+        } catch (exception: EvaluationException) {
+            throw exception.withCall(function.name)
+        }
 
         return returned
-            ?: throw EvaluationException("Function '${expression.name}' completed without return")
+            ?: throw EvaluationException("Function '${expression.name}' completed without return").withCall(function.name)
     }
 
     private fun requireInt(value: Value, context: String): IntValue =

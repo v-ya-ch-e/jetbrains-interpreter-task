@@ -123,4 +123,20 @@ class InterpreterTest {
             interpreter.run("x = missing")
         }
     }
+
+    @Test
+    fun `reports function trace for runtime errors inside calls`() {
+        val exception = assertFailsWith<EvaluationException> {
+            interpreter.run(
+                """
+                fun inner() { return missing }
+                fun outer() { return inner() }
+                result = outer()
+                """.trimIndent(),
+            )
+        }
+
+        assertEquals("Undefined variable 'missing'", exception.description)
+        assertEquals(listOf("inner", "outer"), exception.trace)
+    }
 }
